@@ -1,0 +1,868 @@
+<!--
+%%[
+
+
+SET @SourceID = queryparameter('sk')
+
+IF not Empty(@SourceID) THEN
+
+  SET @SourceFlag = 'Contact'
+  SET @VStreet_API = 'MailingStreet'
+  SET @VCity_API= 'MailingCity'
+  SET @VState_API = 'MailingState'
+  SET @VPCode_API = 'MailingPostalCode'
+  SET @VCountry_API = 'MailingCountry'
+
+
+Set @SourceFlag_Rows = RetrieveSalesforceObjects(
+@SourceFlag,
+'Name , 
+Email , 
+Phone ,  
+MailingStreet , 
+MailingCity , 
+MailingState , 
+MailingPostalCode , 
+MailingCountry , 
+FirstName , 
+LastName , 
+Description , 
+HasOptedOutOfEmail
+',
+       'Id', '=', @SourceID )  
+       
+
+
+If Rowcount(@SourceFlag_Rows) > 0 Then
+    
+      Set @Name = Field(Row(@SourceFlag_Rows,1),'Name')
+      Set @FirstName = Field(Row(@SourceFlag_Rows,1),'FirstName')
+      Set @LastName = Field(Row(@SourceFlag_Rows,1),'LastName')
+      Set @Email = Field(Row(@SourceFlag_Rows,1),'Email')
+      Set @Phone = Field(Row(@SourceFlag_Rows,1),'Phone')
+      Set @Description = Field(Row(@SourceFlag_Rows,1),'Description')
+      Set @Street = Field(Row(@SourceFlag_Rows,1),@VStreet_API)
+      Set @City = Field(Row(@SourceFlag_Rows,1),@VCity_API)
+      Set @State = Field(Row(@SourceFlag_Rows,1),@VState_API)
+      Set @PCode = Field(Row(@SourceFlag_Rows,1),@VPCode_API)
+      Set @Country = Field(Row(@SourceFlag_Rows,1),@VCountry_API)
+      Set @HasOptedOutOfEmail = Field(Row(@SourceFlag_Rows,1),'HasOptedOutOfEmail')
+
+    endIf
+
+
+
+      IF RequestParameter('submitted') == 'submitted' then  
+
+        Set @FirstName = RequestParameter("FirstName")
+        Set @LastName = RequestParameter("LastName")
+        Set @Email = RequestParameter("Email")
+        Set @Phone = RequestParameter("Phone")
+        Set @Description = RequestParameter("Description")
+        Set @Street = RequestParameter(@VStreet_API)
+        Set @City = RequestParameter(@VCity_API)
+        Set @State = RequestParameter(@VState_API)
+        Set @PCode = RequestParameter(@VPCode_API)
+        Set @Country = RequestParameter(@VCountry_API)
+
+
+
+          if RequestParameter('HasOptedOutOfEmail') == '' then
+            Set @HasOptedOutOfEmail = 'true'
+            else
+            Set @HasOptedOutOfEmail = 'false'
+          Endif
+
+
+        SET @SourceFlag_update = UpdateSingleSalesforceObject(@SourceFlag, @SourceID, 
+        "FirstName" , @FirstName , 
+        "LastName" , @LastName , 
+        "Email" , @Email ,
+        "Phone" , @Phone ,
+        "Description" , @Description ,
+        @VStreet_API , @Street ,
+        @VCity_API , @City ,
+        @VState_API , @State ,
+        @VPCode_API , @PCode ,
+        @VCountry_API , @Country,
+        "HasOptedOutOfEmail" , @HasOptedOutOfEmail
+        )
+
+        REDIRECT('https://pracedo.com/en-gb/')
+
+      ENDIF  
+      
+ENDIF
+]%%
+-->
+
+<!--Preference center - Main page -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <meta name="description" content="Placeholder meta description for the Preference Center page">
+
+  <title>Marketing Preferences Center | Pracedo</title>
+
+  <link rel="icon" href="https://pracedo.com/wp-content/uploads/2019/11/favicon.ico" sizes="192x192">
+
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+
+<style>
+
+
+
+/* Styles */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  /* DO NOT CHANGE THE VH UNIT FROM THE min-height*/
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  
+    /* Current Font can be updated by replacing name, as for example:
+  font-family: 'Raleway', sans-serif;
+  can be updated to 
+  font-family: 'Roboto', sans-serif;
+
+ For more fonts, is recomended to use one from the Google fonts 
+    https://fonts.google.com/
+  
+  */
+  
+  font-family: 'Raleway', Verdana, sans-serif;
+  font-size: 18px;
+  line-height: 30px;
+  background-color: white;
+  color: #111c2e;
+  position: absolute;
+}
+
+h1 {
+  font-weight: 400;
+  line-height: 30px;
+  font-size: 16px;
+  margin: 0;
+}
+
+h2 {
+  /* to change the color of the heading 2, a new hex color value will be required, to find the hex value of a color
+  there are tools online as https://imagecolorpicker.com where the hex color can be extracted from an image*/
+
+  
+    
+  color: #18324D;
+  font-weight: 700;
+  line-height: 50px;
+  font-size: 40px;
+}
+
+.introCopy {
+  max-width: 80%;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+button {
+  background-color: white;
+  border: 1px solid #c8d3d9;
+  border-radius: 4px;
+  color: #5f5f5f;
+  font-size: 18px;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  border: 2px solid red;
+  transition: 0.4s;
+  border: 1px solid #00a0aa;
+}
+
+#header {
+  border-bottom: 3px solid #f2f6fa;
+  padding: 1rem 2.5rem;
+  text-align: left;
+  color: white;
+  font-size: 2rem;
+  margin: auto;
+}
+
+#header img {
+  padding-left: 3.8rem;
+}
+
+input[type="text"],
+select,
+textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #c8d3d9;
+  border-radius: 4px;
+  resize: vertical;
+  color: #5f5f5f;
+  font-size: 18px;
+}
+
+label {
+  padding: 1rem 1rem 0 0;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.aboveField {
+  margin-bottom: 1rem;
+}
+
+.labelDescription {
+  margin: 0;
+  color: #8a95a2;
+  max-width: 90%;
+}
+
+.contactDetail {
+  margin: 0 0 0.5rem 0;
+}
+
+.contactDetail:first-of-type {
+  margin-top: 0.6rem;
+}
+
+.radioButton {
+  margin-bottom: 0.5rem;
+}
+
+.radioButton-label {
+  background-color: white;
+  color: #5f5f5f;
+  border: 1px solid #c8d3d9;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  width: 100%;
+  height: 50px;
+  font-size: 18px;
+  font-weight: 400;
+  text-align: center;
+}
+
+input[type="radio"] {
+  opacity: 0;
+  position: fixed;
+  width: 0;
+}
+
+input[type="radio"]:hover + .radioButton-label {
+  transition: 0.4s;
+  border: 1px solid #00a5ae;
+}
+
+input[type="radio"]:checked + .radioButton-label {
+  background-color: #00a5ae;
+  color: white;
+  transition: 0.4s;
+}
+
+input[type="submit"] {
+  background-color: #18324D;
+  color: white;
+  font-size: 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  height: 3rem;
+}
+
+input[type="submit"]:hover {
+  background-color: #37AC9F;
+  transition: 0.3s;
+}
+
+input[name="submitted"] {
+  background-color: #e3e9ec;
+  color: #8a95a2;
+}
+
+input[name="submitted"]:hover {
+  background-color: #c9d2d5;
+  transition: 0.3s;
+}
+
+.container {
+  width: 100%;
+}
+
+.container-successMessage {
+  padding: 1rem 0;
+  margin: 2rem auto 12rem;
+}
+
+.successButton {
+  background-color: #37AC9F;
+  color: white;
+  font-size: 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  height: 3rem;
+  padding: 1rem 5rem;
+  text-decoration: none;
+}
+
+.successButton:hover {
+  background-color: #37AC9F;
+  transition: 0.3s;
+}
+
+.successLink {
+  color: #37AC9F;
+}
+
+.successLink:hover {
+  filter: brightness(0.9);
+}
+
+.largeText {
+  text-align: center;
+  color: #004996;
+  font-weight: 700;
+  line-height: 50px;
+  font-size: 40px;
+  margin-bottom: 5rem;
+}
+
+.columnLeft {
+  float: left;
+  width: 70%;
+  margin-top: 1rem;
+}
+
+.columnRight {
+  float: left;
+  width: 30%;
+  margin-top: 1.5rem;
+}
+
+.columnLeft-name {
+  float: left;
+  width: 45%;
+  margin-top: 1rem;
+  margin-right: 40px;
+}
+
+.columnRight-name {
+  float: left;
+  width: 50%;
+  margin-top: 1rem;
+}
+
+.columnLeft-address {
+  float: left;
+  width: 65%;
+  margin-top: 1rem;
+  margin-right: 40px;
+}
+
+.columnRight-address {
+  float: left;
+  width: 30%;
+  margin-top: 1rem;
+}
+
+.column-L-address {
+  float: left;
+  width: 30%;
+  margin-top: 1rem;
+}
+.column-M-address {
+  float: left;
+  width: 30%;
+  margin-top: 1rem;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+.column-R-address {
+  float: left;
+  width: 30%;
+  margin-top: 1rem;
+}
+
+hr {
+  border: 1px solid #e3e9ec;
+  margin: 2rem 0;
+}
+
+.row {
+  padding: 0.5rem 0;
+}
+
+.row-centred {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+  
+ /* checkbox set up*/
+
+.checkbox {
+  opacity: 1;
+  padding: 0;
+  margin-left: 5rem;
+}
+  
+/* defines the checkbox content*/
+
+.checkbox > div {
+  top: -1ch;
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  border: 1px solid #e3e9ec;
+  cursor: pointer;
+  position: relative;
+  transition: all 250ms;
+  background: #c8d3d9;
+}
+/* defines toggle bg if checked*/
+
+.checkbox > input:checked + div {
+  background: #37AC9F;
+}
+
+/* defines square after animation*/
+
+.checkbox > div:after {
+  content: "";
+  display: inline-block;
+  border-radius: 3px;
+  position: absolute;
+  left: 0ch;
+  top: 0ch;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  color: #5f5f5f;
+  transition: all 500ms;
+  font-weight: 400;
+  font-size: 32px;
+  text-align: center;
+  line-height: 45px;
+  background: #c8d3d9;
+
+}
+
+/* when checked moved to the right*/
+.checkbox > input:checked + div:after {
+  left: 0ch;
+  content: "\02714";
+  color: #fff;
+    background: #37AC9F;
+
+}
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /* toggle set up*/
+
+.switch {
+  opacity: 1;
+  padding: 0;
+  margin-left: 5rem;
+}
+  
+  
+/* visually hides checkboxes upon load */
+
+input[type="checkbox"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* defines the content*/
+
+.switch > div {
+  top: -1ch;
+  width: 174px;
+  height: 50px;
+  border-radius: 4px;
+  border: 1px solid #e3e9ec;
+  cursor: pointer;
+  position: relative;
+  transition: all 250ms;
+  background: #c8d3d9;
+}
+
+/* defines toggle bg if checked*/
+
+.switch > input:checked + div {
+  background: #37AC9F;
+}
+
+/* defines square after animation*/
+
+.switch > div:after {
+  content: "Off";
+  display: inline-block;
+  border-radius: 3px;
+  position: absolute;
+  left: 0ch;
+  top: 0ch;
+  height: 100%;
+  width: 50%;
+  background-color: white;
+  color: #5f5f5f;
+  transition: all 500ms;
+  font-weight: 400;
+  font-size: 18px;
+  text-align: center;
+  line-height: 45px;
+}
+
+/* when checked moved to the right*/
+.switch > input:checked + div:after {
+  left: 5.4rem;
+  content: "On";
+  color: #37AC9F;
+}
+
+#mainContent {
+  max-width: 850px;
+  margin: auto;
+  padding-bottom: 30vh;
+}
+
+#headerContent {
+  padding: 1rem;
+}
+
+.columnRight.toggleInput {
+  max-height: 2rem;
+}
+
+footer {
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7f8;
+  color: #8a95a2;
+}
+
+.footerContent {
+  display: flex;
+  max-width: 850px;
+  margin: auto;
+  height: 100%;
+  padding: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footerContent-left {
+  align-items: flex-start;
+}
+
+.footerContent-right {
+  display: flex;
+  align-items: flex-end;
+}
+
+.footerContent-right > li {
+  list-style: none;
+}
+
+.footerContent-right > li:not(:last-child) {
+  padding: 0 2rem 0 0;
+}
+
+a {
+  color: #8a95a2;
+}
+
+@media screen and (max-width: 1200px) {
+  #header img {
+    padding: 0;
+    display: block;
+    margin: auto;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  #mainContent {
+    max-width: 80%;
+    margin: auto;
+  }
+
+  .switch {
+    margin-left: 0;
+  }
+ .checkbox {
+    margin-left: 0;
+  }
+  .columnLeft-name,
+  .columnRight-name,
+  .columnLeft-address,
+  .columnRight-address,
+  .column-L-address,
+  .column-M-address,
+  .column-R-address {
+    width: 100%;
+  }
+
+  .columnLeft-address {
+    margin-top: 0;
+  }
+  .column-M-address{
+    margin-left: 0;
+    margin-right: 0;
+
+  }
+  .footerContent {
+    padding: 1.5rem 4.5rem;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .columnLeft,
+  .columnRight,
+  .columnLeft-name,
+  .columnRight-name,
+  .columnLeft-address,
+  .columnRight-address,
+  input[type="submit"] {
+    width: 100%;
+  }
+
+  .columnLeft > label {
+    padding-right: 0;
+  }
+
+  .columnRight > .switch {
+    margin-left: 0;
+  }
+
+  .largeText {
+    text-align: center;
+    font-size: 2rem;
+  }
+
+  .labelDescription {
+    max-width: 100%;
+  }
+
+  .introCopy {
+    max-width: 100%;
+  }
+
+  h2 {
+    font-size: 32px;
+  }
+
+  .footerContent {
+    display: block;
+  }
+
+  .footerContent-left {
+    text-align: center;
+  }
+
+  .footerContent-right {
+    justify-content: center;
+    display: block;
+    text-align: center;
+  }
+
+  .footerContent-right > li:not(:last-child) {
+    padding: 0;
+  }
+
+  #header {
+    padding: 1rem 0;
+  }
+
+  #header img {
+    height: 75px;
+  }
+
+
+}
+
+
+</style>
+
+</head>
+
+<body>
+  <div id="header">
+    <a href="https://pracedo.com">
+      <span alt="Pracedo Logo" height="100"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="75" viewBox="0 0 250 40">
+      <g fill="#18324D" fill-rule="evenodd">
+        <path d="M187.51 8c6.213 0 11.248 5.036 11.248 11.248 0 6.211-5.035 11.247-11.247 11.247s-11.248-5.036-11.248-11.247C176.263 13.036 181.3 8 187.511 8zm-.073 5.44c-2.801 0-5.072 2.633-5.072 5.881s2.271 5.881 5.072 5.881c2.802 0 5.073-2.633 5.073-5.88 0-3.249-2.271-5.882-5.073-5.882zM74.003 8.363c1.14 0 6.1 1.307 6.1 7.485 0 3.977-2.034 6.584-6.1 7.822a2.941 2.941 0 0 1-.856.127H69v6.713h-6V8.363h11.003zm-1.705 5.131h-3.283v4.756h3.786c.705-.33 1.058-1.122 1.058-2.378 0-1.257-.52-2.05-1.561-2.378zM93.61 8.363c2.243 0 5.958 3.238 5.958 7.527 0 2.859-1.022 5-3.067 6.425l4.497 8.07h-6.894l-3.782-6.616H88.09v6.741h-6.15V8.363h11.67zm-1.703 5.102h-3.786v4.724h4.328c.245 0 .992-.984.992-2.362 0-1.378-.696-2.362-1.534-2.362zM102.186 30.51h6.044c.064 0 .12-.041.14-.102l3.93-12.24a.147.147 0 0 1 .28-.001l4.063 12.242c.02.06.076.101.14.101h5.945a.147.147 0 0 0 .139-.195l-7.554-21.853a.147.147 0 0 0-.139-.1h-5.47a.147.147 0 0 0-.138.1l-7.519 21.853a.147.147 0 0 0 .14.195zM133.331 8a11.38 11.38 0 0 1 9.32 4.838l-4.283 3.043c-.181.131-.335.21-.462.238-.89-1.883-2.635-2.826-4.648-2.826-2.923 0-5.493 2.666-5.493 5.955 0 3.288 2.57 6.136 5.493 6.136 1.947 0 3.643-.963 4.559-2.778l5.155 2.865a11.386 11.386 0 0 1-9.64 5.318c-6.294 0-11.395-5.101-11.395-11.394S127.038 8 133.33 8zM144.713 30.51V8.363h15.685v5.19h-9.65v3.056h8.11v5.063h-8.11v3.712h9.65v5.126z">
+        </path>
+        <path d="M173.034 8.363c.343 0 .686.028 1.025.085 1.54.26 2.829.76 3.868 1.504.149.106.291.223.427.35-1.437 1.259-2.54 2.959-3.136 4.914-.552-.523-1.27-.966-2.155-1.33a2.794 2.794 0 0 0-1.06-.209h-3.02v11.565h2.98c.928 0 2.249-.903 3.052-1.706.535-.535 1.009-1.507 1.42-2.918l.003-.025c.02.038.037.08.054.124.774 2.045 1.82 4.318 3.237 5.992a5.44 5.44 0 0 1-.451.806c-.833 1.224-2.672 2.17-5.517 2.839a5.881 5.881 0 0 1-1.346.156h-9.59V8.363h10.209zM0 37.84V4.907C0 2.43 1.631 0 4.225 0h44.474C52.02 0 53 2.763 53 3.835v14.173c0 1.463-.712 2.253-1.537 2.253-.826 0-7.657.47-11.127 2.982-3.47 2.513-6.613 7.339-6.76 7.793-.098.302-.55.302-1.357 0-2.799-1.036-5.326-1.389-7.58-1.057-.665.097-3.444.438-6.71 2.79-1.732 1.247-3.242 2.937-4.529 5.071a34.778 34.778 0 0 1-2.469-.12c-1.125-.098-3.391 0-4.34.12-.947.12-3.1.45-4.316.997C1.059 39.384 0 38.429 0 37.84z">
+        </path>
+      </g>
+    </svg></span>
+      
+    </a>
+  </div>
+  
+  <div id="mainContent"> 
+    
+
+    <h2>Preference center template. </h2>
+
+    <p class="introCopy">
+      
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br>
+      
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+    <div class="container">
+      <form action="%%=RequestParameter('PAGEURL')=%%" method="post" role="form">
+        <div class="row">
+          <div class="columnLeft">
+            <label>Contact details</label>
+            <p class="contactDetail">%%=v(@Name)=%%</p>
+            <p class="contactDetail">%%=v(@Email)=%%</p>
+            <p class="contactDetail">%%=v(@Phone)=%%</p>
+            <br>
+            <p class="contactDetail">%%=v(@Street)=%% </p>
+            <p class="contactDetail">%%=v(@City)=%% %%[IF @State != '' THEN]%%,%%[ENDIF]%% %%=v(@State)=%%</p>
+            <p class="contactDetail">%%=v(@PCode)=%% %%[IF @Country != '' THEN]%%,%%[ENDIF]%% %%=v(@Country)=%%</p>
+
+
+
+          </div>
+         
+          <div class="columnRight">
+            
+          </div>
+        </div>
+
+        <hr />
+<!--INTERNAL_COMMENT -  Text Input - add more Text fields by duplicating this component -->
+
+        <div class="row">
+            <div class="columnLeft-name">
+              <label class="aboveField" for="fname">First Name<span style="color: coral;">*</span></label>
+              <input type="text" id="fname" name="FirstName" value="%%=v(@FirstName)=%%" placeholder="First Name" required autocomplete="given-name">
+            </div>
+            <div class="columnRight-name">
+              <label class="aboveField" for="lname">Last Name<span style="color: coral;">*</span></label>
+              <input type="text" id="lname" name="LastName" value="%%=v(@LastName)=%%" placeholder="Last Name" required autocomplete="family-name">
+            </div>
+        </div>
+<!-- INTERNAL_COMENT - Text Input - END -->        
+
+          <div class="row">
+            <label class="aboveField" for="emailAddress">Email Address<span style="color: coral;">*</span></label>
+            <input type="text" id="EmailID" name="Email" value="%%=v(@Email)=%%" placeholder="Email Address" required autocomplete="email">
+          </div>
+
+          <div class="row">
+            <label class="aboveField" for="description">Description.</label>
+            <textarea id="descriptionID" name="Description" rows="6" maxlength="32000"> %%=v(@Description)=%% </textarea>
+          </div>
+
+
+        <div class="row">
+          <div class="columnLeft">
+            <label for="RadioTest">Email</label> 
+            <p class="labelDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          </div>
+          <div class="columnRight" >
+                    <label class="switch">
+              <input type="checkbox" name="HasOptedOutOfEmail" %%[IF @HasOptedOutOfEmail!='true' THEN]%% checked value="true" %%[ENDIF]%% />
+              <div class=""></div>
+            </label>
+            </div>
+          </div>
+        </div>
+
+        <hr />
+<!--INTERNAL_COMMENT -  Toggle Input - add more toggle links by duplicating this component -->
+        <div class="row">
+          <div class="columnLeft">
+            <label for="CheckboxTest">SMS</label>
+            <p class="labelDescription">Lorem ipsum dolor sit ametuip ex ea commodo consequat.</p>
+          </div>
+          <div class="columnRight" >
+            <label class="switch">
+              <input type="checkbox" name="SMS_opt_in__c" %%[IF @SMS_opt_in=='true' THEN]%% checked value="true" %%[ENDIF]%% />
+              <div class=""></div>
+            </label>
+          </div>
+        </div>
+<!-- INTERNAL_COMENT - Toggle Input - END -->        
+      
+      <!--INTERNAL_COMMENT -  checkbox Input - add more toggle links by duplicating this component -->
+        <div class="row">
+          <div class="columnLeft">
+            <label for="CheckboxTest">SMS</label>
+            <p class="labelDescription">Lorem ipsum dolor sit ametuip ex ea commodo consequat.</p>
+          </div>
+          <div class="columnRight" >
+            <label class="checkbox">
+              <input type="checkbox" name="SMS_opt_in__c" %%[IF @SMS_opt_in=='true' THEN]%% checked value="true" %%[ENDIF]%% />
+              <div class=""></div>
+            </label>
+          </div>
+        </div>
+<!-- INTERNAL_COMENT - checkbox Input - END -->   
+    
+ 
+        <br>  
+        
+        <div class="row">
+          <div class="columnLeft"></div>
+          <div class="columnRight">
+            <input type="hidden" name="submitted" value="submitted">
+            <input type="submit" value="Update preferences">
+          </div>
+        </div>    
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footerContent">
+      <div class="footerContent-left">
+        <p>© Pracedo %%=FormatDate(Now(), "yyyy")=%% </p>
+      </div>
+      <div class="footerContent-right">
+<!-- INTERNAL_COMENT List Item - add more URLs links by duplicating this component-->        
+        <li><a href="https://pracedo.com/en-gb/privacy-policy/">Privacy Policy</a></li>
+<!-- INTERNAL_COMENT List Item - END -->        
+
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
